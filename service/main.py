@@ -11,86 +11,107 @@ try:
 except: pass
 
 def do_notify(mode='normal',title='Title',message='Message',ticker='Ticker'):
-    from npy import notification_modified
-    from plyer.utils import platform
-    from plyer.compat import PY2
-    title = str(title)
-    message = str(message)
-    ticker = str(ticker)
+    try:
+        from npy import notification_modified
+        from plyer.utils import platform
+        from plyer.compat import PY2
+        title = str(title)
+        message = str(message)
+        ticker = str(ticker)
 
-    if PY2:
-        title = title.decode('utf8')
-        message = message.decode('utf8')
-    kwargs = {'title': title, 'message': message, 'ticker': ticker}
+        if PY2:
+            title = title.decode('utf8')
+            message = message.decode('utf8')
+        kwargs = {'title': title, 'message': message, 'ticker': ticker}
 
-    ee = notification_modified.AndroidNotification()
-    ee.notify(**kwargs)
-    return ee
+        ee = notification_modified.AndroidNotification()
+        ee.notify(**kwargs)
+        return ee
+    except Exception as e: osc.sendMsg('/some_api', ['Do notify exception '+str(e)], port=3002)
 
 class M_Player:
     def __init__(self,parent):
-        self.br = BroadcastReceiver(self.on_broadcast, actions=['com.example.app.ACTION_PLAY'])
-        self.br.start()
-        self.br2 = BroadcastReceiver(self.on_broadcast, actions=['com.example.app.ACTION_STOP'])
-        self.br2.start()
+        try:
+            self.br = BroadcastReceiver(self.on_broadcast, actions=['com.example.app.ACTION_PLAY'])
+            self.br.start()
+            self.br2 = BroadcastReceiver(self.on_broadcast, actions=['com.example.app.ACTION_STOP'])
+            self.br2.start()
 
-        self.times = 0
-        self.parent = parent
-        self.sound = None
-        self.pauseTime = None
-        self.state = 'stop'
-        self.path = '/data/data/org.test.npexample/files/rain.ogg'
+            self.times = 0
+            self.parent = parent
+            self.sound = None
+            self.pauseTime = None
+            self.state = 'stop'
+            self.path = '/data/data/org.test.npexample/files/rain.ogg'
+        except Exception as e: osc.sendMsg('/some_api', ['Mplayer exception '+str(e)], port=3002)
 
     def on_broadcast(self, context, intent):
-        action = intent.getAction()
-        if action == 'com.example.app.ACTION_PLAY':
-            self.parent.queue = 'Play'
-        elif action == 'com.example.app.ACTION_STOP':
-            self.parent.queue = 'Pause'
+        try:
+            action = intent.getAction()
+            osc.sendMsg('/some_api', ['On_broadcast '+str(action)], port=3002)
+            if action == 'com.example.app.ACTION_PLAY':
+                self.parent.queue = 'Play'
+            elif action == 'com.example.app.ACTION_STOP':
+                self.parent.queue = 'Pause'
+        except Exception as e: osc.sendMsg('/some_api', [str(e)], port=3002)
 
     def play(self):
-        if self.sound == None:
-            if self.pauseTime == None:
-                self.sound = SoundLoader.load(self.path)
-                if self.sound:
-                    self.sound.play()
-        else:
-            self.sound.play()
-            if self.state == 'pause':
-                sleep(0.2)
-                self.sound.seek(int(self.pauseTime))
-        self.state = 'play'
-        do_notify(title='Play')
+        osc.sendMsg('/some_api', ['Play'], port=3002)
+        try:
+            if self.sound == None:
+                if self.pauseTime == None:
+                    self.sound = SoundLoader.load(self.path)
+                    if self.sound:
+                        self.sound.play()
+            else:
+                self.sound.play()
+                if self.state == 'pause':
+                    sleep(0.2)
+                    self.sound.seek(int(self.pauseTime))
+            self.state = 'play'
+            do_notify(title='Play')
+        except Exception as e:
+            osc.sendMsg('/some_api', [str(e)], port=3002)
 
     def pause(self):
-        if self.sound == None:
-            pass
-        else:
-            self.pauseTime = self.sound.get_pos()
-            self.sound.stop()
-        self.state = 'pause'
-        do_notify(title='Pause')
+        try:
+            osc.sendMsg('/some_api', ['Pause'], port=3002)
+            if self.sound == None:
+                pass
+            else:
+                self.pauseTime = self.sound.get_pos()
+                self.sound.stop()
+            self.state = 'pause'
+            do_notify(title='Pause')
+        except Exception as e: osc.sendMsg('/some_api', [str(e)], port=3002)
 
     def osc_callback(self,message,*args):
-        if message[2] == 'Play':
-            self.play()
-        elif message[2] == 'Pause':
-            self.pause()
+        try:
+            if message[2] == 'Play':
+                self.play()
+            elif message[2] == 'Pause':
+                self.pause()
+        except Exception as e: osc.sendMsg('/some_api', [str(e)], port=3002)
 
 class Service:
     def __init__(self):
-        self.queue = ''
-        self.mplayer = M_Player(self)
+        sleep(2)
         osc.init()
         oscid = osc.listen(ipAddr='127.0.0.1', port=3001)
-        osc.bind(oscid, self.mplayer.osc_callback, '/some_api')
+        try:
+            osc.sendMsg('/some_api', ['Init'], port=3002)
+            self.mplayer = M_Player(self)
+            osc.bind(oscid, self.mplayer.osc_callback, '/some_api')
+            self.queue = ''
 
-        while True:
-            osc.readQueue(oscid)
-            if self.queue != '':
-                self.mplayer.osc_callback(['','',self.queue])
-                self.queue = ''
-            sleep(.3)
+            while True:
+                osc.readQueue(oscid)
+                if self.queue != '':
+                    self.mplayer.osc_callback(['','',self.queue])
+                    self.queue = ''
+                    sleep(.3)
+        except Exception as e:
+            osc.sendMsg('/some_api', ['Service crash '+str(e)], port=3002)
 
 
 def main_loop():

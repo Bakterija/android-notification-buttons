@@ -1,17 +1,19 @@
 #:kivy 1.8.0
 <NotificationDemo>:
     orientation: 'vertical'
+	ScrollView:
+		id: 'scroller'
+		size_hint: 1, 0.5
     Button:
         text: 'Play'
-        size_hint: 1, 0.4
+        size_hint: 1, 0.2
         on_press: root.play()
     Button:
         text: 'Pause'
-        size_hint: 1, 0.4
-        on_press:
-            root.pause()
+        size_hint: 1, 0.2
+        on_press: root.pause()
     Button:
         text: 'Stop service'
-        size_hint: 1, 0.2
+        size_hint: 1, 0.1
         on_press:
             root.quit()
