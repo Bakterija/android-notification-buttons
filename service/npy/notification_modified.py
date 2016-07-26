@@ -28,31 +28,48 @@ class AndroidNotification(Notification):
 
         noti = NotificationBuilder(activity)
 
-        Pend = autoclass('android.app.PendingIntent')
-        Intent = return_intent("com.example.app.ACTION_PLAY")
-        Intent2 = return_intent("com.example.app.ACTION_STOP")
+        try:
+            Pend = autoclass('android.app.PendingIntent')
+            Intent = return_intent("com.example.app.ACTION_PLAY")
+            Intent2 = return_intent("com.example.app.ACTION_STOP")
+        except Exception as e:
+            raise Exception('PendingIntent', str(e))
 
-        pend = Pend.getBroadcast( this, 100, Intent, 0)
-        pend2 = Pend.getBroadcast( this, 100, Intent2, 0)
+        try:
+            pend = Pend.getBroadcast( this, 100, Intent, 0)
+            pend2 = Pend.getBroadcast( this, 100, Intent2, 0)
+        except Exception as e:
+            raise Exception('getBroadcast', str(e))
 
         ## Icon integers are available at https://developer.android.com/reference/android/R.drawable.html
-        noti.addAction(17301540, "Play", pend)
-        noti.addAction(17301539, "Pause", pend2)
+        try:
+            noti.addAction(17301540, "Play", pend)
+            noti.addAction(17301539, "Pause", pend2)
+        except Exception as e:
+            raise Exception('addAction', str(e))
 
-        noti.setContentTitle(AndroidString( kwargs.get('title').encode('utf-8')))
-        noti.setContentText(AndroidString( kwargs.get('message').encode('utf-8')))
-        noti.setTicker(AndroidString( kwargs.get('ticker').encode('utf-8')))
+        try:
+            noti.setContentTitle(AndroidString( kwargs.get('title').encode('utf-8')))
+            noti.setContentText(AndroidString( kwargs.get('message').encode('utf-8')))
+            noti.setTicker(AndroidString( kwargs.get('ticker').encode('utf-8')))
+        except Exception as e:
+            raise Exception('setContent', str(e))
 
-        noti.setSmallIcon(icon)
-        noti.setAutoCancel(True)
-        self.noti = noti
+        try:
+            noti.setSmallIcon(icon)
+            noti.setAutoCancel(True)
+        except Exception as e:
+            raise Exception('setIcon', str(e))
 
-        if SDK_INT >= 16:
-            noti = noti.build()
-        else:
-            noti = noti.getNotification()
+        try:
+            if SDK_INT >= 16:
+                noti = noti.build()
+            else:
+                noti = noti.getNotification()
 
-        self._get_notification_service().notify(0, noti)
+            self._get_notification_service().notify(0, noti)
+        except Exception as e:
+            raise Exception('buildNoti', str(e))
 
 
 def instance():
