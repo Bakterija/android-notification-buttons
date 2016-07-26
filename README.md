@@ -5,9 +5,9 @@ Python Kivy Android notification button example
 ###
 Uses modified [P4A](https://github.com/kivy/python-for-android "Python for Android") 
 [BroadcastReceiver](https://developer.android.com/reference/android/content/BroadcastReceiver.html "Android BroadcastReceiver") 
-to register custom 
-[intent](https://developer.android.com/reference/android/content/Intent.html "Android Intent")
-listeners and modified [Plyer](https://github.com/kivy/plyer "Plyer") notifications to add buttons with custom 
+to listen to custom
+[intents](https://developer.android.com/reference/android/content/Intent.html "Android Intent")
+, and modified [Plyer](https://github.com/kivy/plyer "Plyer") notifications to add buttons with custom 
 [intent](https://developer.android.com/reference/android/content/Intent.html "Android Intent") 
 actions
 
