@@ -1,4 +1,5 @@
 Python Kivy Android notification button example
+#### Tested on Android 4.4, doesn't work on Android 6 currently
 =============
 
 [Android notification](https://developer.android.com/guide/topics/ui/notifiers/notifications.html) buttons allow you to control your background services while using other apps
