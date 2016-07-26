@@ -1,4 +1,4 @@
-Python Kivy Android notification button example
+# Python Kivy Android notification button example
 #### Tested on Android 4.4, doesn't work on Android 6 currently
 =============
 
