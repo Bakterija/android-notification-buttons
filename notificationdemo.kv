@@ -1,0 +1,17 @@
+#:kivy 1.8.0
+<NotificationDemo>:
+    orientation: 'vertical'
+    Button:
+        text: 'Play'
+        size_hint: 1, 0.4
+        on_press: root.play()
+    Button:
+        text: 'Pause'
+        size_hint: 1, 0.4
+        on_press:
+            root.pause()
+    Button:
+        text: 'Stop service'
+        size_hint: 1, 0.2
+        on_press:
+            root.quit()
