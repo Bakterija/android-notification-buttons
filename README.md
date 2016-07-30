@@ -40,3 +40,16 @@ nBuilder.Button('Play', 17301540 , callback, action='Play')
 ```python
 nBuilder.build()
 ```
+    
+    
+
+#### Remove buttons with
+```python
+nBuilder.remove_buttons()
+```
+
+#### Start/Stop BroadcastReceivers with
+```python
+nBuilder.start()
+nBuilder.stop()
+```
