@@ -1,59 +1,38 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 from time import sleep
 from kivy.utils import platform
 from kivy.core.audio import SoundLoader
 from kivy.lib import osc
+from noti_builder.noti_builder import Notification_Builder
 try:
-    from android.broadcast import BroadcastReceiver
     from jnius import autoclass
-    from plyer import notification
 except: pass
 
-def do_notify(mode='normal',title='Title',message='Message',ticker='Ticker'):
-    try:
-        from npy import notification_modified
-        from plyer.utils import platform
-        from plyer.compat import PY2
-        title = str(title)
-        message = str(message)
-        ticker = str(ticker)
-
-        if PY2:
-            title = title.decode('utf8')
-            message = message.decode('utf8')
-        kwargs = {'title': title, 'message': message, 'ticker': ticker}
-
-        ee = notification_modified.AndroidNotification()
-        ee.notify(**kwargs)
-        return ee
-    except Exception as e: osc.sendMsg('/some_api', ['Do notify exception '+str(e)], port=3002)
-
 class M_Player:
+    def intent_callback(self,intent,*arg):
+        ## BroadcastReceiver callbacks are done on a different thread and can crash
+        ## the service on unsafe tasks, setting strings is safe
+        self.parent.queue = intent
+
     def __init__(self,parent):
         try:
-            self.br = BroadcastReceiver(self.on_broadcast, actions=['com.example.app.ACTION_PLAY'])
-            self.br.start()
-            self.br2 = BroadcastReceiver(self.on_broadcast, actions=['com.example.app.ACTION_STOP'])
-            self.br2.start()
+            self.nBuilder = Notification_Builder()
+            self.nBuilder.set_title('Stop')
+            self.nBuilder.set_message('msg')
+            self.nBuilder.set_ticker('Button example')
+            ## 0. Displayed button name
+            ## 1. icon integer available at https://developer.android.com/reference/android/R.drawable.html
+            ## 2. callback
+            ## action= android PendingIntent action, button name will be used if not provided
+            self.nBuilder.Button('Play', 17301540 , self.intent_callback, action='Play')
+            self.nBuilder.Button('Pause', 17301539 , self.intent_callback, action='Pause')
+            self.nBuilder.build()
 
-            self.times = 0
             self.parent = parent
             self.sound = None
             self.pauseTime = None
             self.state = 'stop'
             self.path = '/data/data/org.test.npexample/files/rain.ogg'
         except Exception as e: osc.sendMsg('/some_api', ['Mplayer exception '+str(e)], port=3002)
-
-    def on_broadcast(self, context, intent):
-        try:
-            action = intent.getAction()
-            osc.sendMsg('/some_api', ['On_broadcast '+str(action)], port=3002)
-            if action == 'com.example.app.ACTION_PLAY':
-                self.parent.queue = 'Play'
-            elif action == 'com.example.app.ACTION_STOP':
-                self.parent.queue = 'Pause'
-        except Exception as e: osc.sendMsg('/some_api', [str(e)], port=3002)
 
     def play(self):
         osc.sendMsg('/some_api', ['Play'], port=3002)
@@ -69,7 +48,8 @@ class M_Player:
                     sleep(0.2)
                     self.sound.seek(int(self.pauseTime))
             self.state = 'play'
-            do_notify(title='Play')
+            self.nBuilder.set_title('Play')
+            self.nBuilder.build()
         except Exception as e:
             osc.sendMsg('/some_api', [str(e)], port=3002)
 
@@ -82,7 +62,8 @@ class M_Player:
                 self.pauseTime = self.sound.get_pos()
                 self.sound.stop()
             self.state = 'pause'
-            do_notify(title='Pause')
+            self.nBuilder.set_title('Pause')
+            self.nBuilder.build()
         except Exception as e: osc.sendMsg('/some_api', [str(e)], port=3002)
 
     def osc_callback(self,message,*args):
@@ -95,7 +76,7 @@ class M_Player:
 
 class Service:
     def __init__(self):
-        sleep(2)
+        sleep(1)
         osc.init()
         oscid = osc.listen(ipAddr='127.0.0.1', port=3001)
         try:
@@ -112,7 +93,6 @@ class Service:
                     sleep(.3)
         except Exception as e:
             osc.sendMsg('/some_api', ['Service crash '+str(e)], port=3002)
-
 
 def main_loop():
     service = Service()

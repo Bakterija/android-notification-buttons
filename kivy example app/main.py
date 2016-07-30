@@ -31,7 +31,6 @@ class MultiLineLabel(Label):
 class NotificationDemo(BoxLayout):
 
     def __init__(self, **kwargs):
-        global osc
         super(BoxLayout, self).__init__( **kwargs)
         self.scroller = self.children[-1]
 
@@ -49,23 +48,19 @@ class NotificationDemo(BoxLayout):
         self.grid.add_widget(Label)
 
     def play(self):
-        global osc
         osc.sendMsg('/some_api', ['Play'], port=3001)
 
     def pause(self):
-        global osc
         osc.sendMsg('/some_api', ['Pause'], port=3001)
 
     def quit(self):
         global service
         service.stop()
-
-def some_api_callback(message, *args):
-    pass
+        
 
 class NotificationDemoApp(App):
     def build(self):
-        global osc, service
+        global service
         if platform == 'android':
             from android import AndroidService
             service = AndroidService('my service', 'running')
@@ -75,6 +70,7 @@ class NotificationDemoApp(App):
 
     def on_pause(self):
         return True
+        
     def on_resume(self):
         pass
 
