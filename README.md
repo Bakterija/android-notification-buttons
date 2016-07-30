@@ -1,5 +1,4 @@
 # Android Notification Builder for Python
-=============
 
 Provides a simple way of building
 [Android notifications](https://developer.android.com/guide/topics/ui/notifiers/notifications.html) 
