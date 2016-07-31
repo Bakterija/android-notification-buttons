@@ -7,6 +7,8 @@ from jnius import autoclass
 class Receiver:
     def __init__(self):
         self.registered = False
+        self.intentName = ''
+        self.actionName = ''
 
     def register(self, intentName, actionName, callback):
         self.br = BroadcastReceiver(self.on_broadcast, actions=[intentName+actionName])
@@ -54,7 +56,13 @@ class Notification_Builder:
     def set_intent(self,string):
         self.kwargs['intentName'] = string
 
+    def add_button(self,name,icon,callback,action=None):
+        self.add_button_func(name,icon,callback,action)
+
     def Button(self,name,icon,callback, action=None):
+        self.add_button_func(name,icon,callback,action)
+
+    def add_button_func(self,name,icon,callback, action):
         ## 0. Displayed button name
         ## 1. icon integer available at https://developer.android.com/reference/android/R.drawable.html
         ## 2. callback
@@ -63,6 +71,21 @@ class Notification_Builder:
             action = name
         self.buttons.append([action,name,icon,callback])
         self.buttonChange = True
+
+    def remove_button(self, bName):
+        found = False
+        for i,x in iterate(self.buttons):
+            if x[1] == bName:
+                delvar = i
+                found = True
+                break
+        if found:
+            for i2,x in iterate(self.receivers):
+                if x.actionName == self.buttons[i][0]:
+                    x.stop()
+                    del self.receivers[i2]
+                    break
+            del self.buttons[i]
 
     def remove_buttons(self):
         self.buttons = []

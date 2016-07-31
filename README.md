@@ -33,7 +33,7 @@ nBuilder.set_ticker('Button example')
 ## 1. icon integer available at https://developer.android.com/reference/android/R.drawable.html
 ## 2. callback
 ## action= android PendingIntent action, button name will be used if not provided
-nBuilder.Button('Play', 17301540 , callback, action='Play')
+nBuilder.add_button('Play', 17301540 , callback, action='Play')
 ```
 
 #### Build
