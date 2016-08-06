@@ -7,7 +7,7 @@ Buttons allow you to control your background services while using other apps
 
 ![screenshot](https://raw.githubusercontent.com/Bakterija/android-notification-buttons/master/other/Screenshot.png "Screenshot on android 4.4 KitKat")
 
-## How to use
+## How to use (Python2.7)
 
 #### Copy "noti_builder" folder to "service/" folder
 
