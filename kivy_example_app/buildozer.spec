@@ -29,7 +29,7 @@ source.include_exts = py,png,jpg,kv,atlas,m4a,ico,png,ogg
 # version.filename = %(source.dir)s/main.py
 
 # (str) Application versioning (method 2)
-version = 1.0
+version = 1.1
 
 # (list) Application requirements
 requirements = plyer,kivy,android

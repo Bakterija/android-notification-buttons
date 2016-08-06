@@ -14,19 +14,23 @@ NotificationBuilder = autoclass('android.app.Notification$Builder')
 Drawable = autoclass("{}.R$drawable".format(activity.getPackageName()))
 PythonService = autoclass('org.renpy.android.PythonService')
 Pend = autoclass('android.app.PendingIntent')
+NotificationManager = autoclass('android.app.NotificationManager')
 this = PythonService.mService
 if SDK_INT > 22:
     Action_Builder = autoclass('android.app.Notification$Action$Builder')
 
 class AndroidNotification:
+    def __init__(self):
+        self.noti = NotificationBuilder(activity)
+
     def _get_notification_service(self):
         if not hasattr(self, '_ns'):
             self._ns = activity.getSystemService(Context.NOTIFICATION_SERVICE)
         return self._ns
 
     def notify(self, **kwargs):
+        noti = self.noti
         icon = getattr(Drawable, kwargs.get('icon_android', 'icon'))
-        noti = NotificationBuilder(activity)
 
         ## Icon integers are available at https://developer.android.com/reference/android/R.drawable.html
         if SDK_INT >= 16:
@@ -44,9 +48,14 @@ class AndroidNotification:
         noti.setContentTitle(aString( kwargs.get('title').encode('utf-8')))
         noti.setContentText(aString( kwargs.get('message').encode('utf-8')))
         noti.setTicker(aString( kwargs.get('ticker').encode('utf-8')))
+        if kwargs['subtext']:
+            noti.setSubText(aString( kwargs.get('subtext').encode('utf-8')))
+        if kwargs['ongoing']:
+            noti.setOngoing(True)
+        if kwargs['autocancel']:
+            noti.setAutoCancel(True)
 
         noti.setSmallIcon(icon)
-        noti.setAutoCancel(True)
 
         if SDK_INT >= 16:
             noti = noti.build()
@@ -54,6 +63,9 @@ class AndroidNotification:
             noti = noti.getNotification()
 
         self._get_notification_service().notify(kwargs['num'], noti)
+
+    def remove(self, num):
+        self._get_notification_service().cancel(num)
 
 
 def instance():

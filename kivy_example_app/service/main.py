@@ -67,16 +67,50 @@ class M_Player:
         except Exception as e: osc.sendMsg('/some_api', [str(e)], port=3002)
 
     def osc_callback(self,message,*args):
-        try:
-            if message[2] == 'Play':
-                self.play()
-            elif message[2] == 'Pause':
-                self.pause()
-        except Exception as e: osc.sendMsg('/some_api', [str(e)], port=3002)
+        if message[2] == 'Play':
+            self.play()
+        elif message[2] == 'Pause':
+            self.pause()
+        elif message[2] == 'Remove_noti':
+            self.nBuilder.remove_notification()
+
+        elif message[2] == 'Toggle_ongoing':
+            if self.nBuilder.kwargs['ongoing']:
+                self.nBuilder.set_ongoing(False)
+            else:
+                self.nBuilder.set_ongoing(True)
+            self.send_values()
+
+        elif message[2] == 'Toggle_autocancel':
+            if self.nBuilder.kwargs['autocancel']:
+                self.nBuilder.set_autocancel(False)
+            else:
+                self.nBuilder.set_autocancel(True)
+            self.send_values()
+
+        elif message[2] == 'Toggle_subtext':
+            if self.nBuilder.kwargs['subtext']:
+                self.nBuilder.set_subtext(None)
+            else:
+                self.nBuilder.set_subtext('Hello, This is android subtext')
+            self.send_values()
+
+        elif message[2] == 'Ping':
+            self.send_values()
+
+    def send_values(self):
+        osc.sendMsg('/some_api', ['ongoing'+str(int(self.nBuilder.kwargs['ongoing']))], port=3002)
+        sleep(0.03)
+        osc.sendMsg('/some_api', ['autocancel'+str(int(self.nBuilder.kwargs['autocancel']))], port=3002)
+        sleep(0.03)
+        if self.nBuilder.kwargs['subtext']:
+            osc.sendMsg('/some_api', ['subtext1'], port=3002)
+        else:
+            osc.sendMsg('/some_api', ['subtext0'], port=3002)
 
 class Service:
     def __init__(self):
-        sleep(1)
+        sleep(0.5)
         osc.init()
         oscid = osc.listen(ipAddr='127.0.0.1', port=3001)
         try:

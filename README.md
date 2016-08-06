@@ -27,6 +27,11 @@ nBuilder.set_message('myMessage')
 nBuilder.set_ticker('Button example')
 ```
 
+#### Add subtext, if required
+```python
+nBuilder.set_subtext(str)
+```
+
 #### Add buttons, if required
 ```python
 ## 0. Displayed button name
@@ -40,16 +45,41 @@ nBuilder.add_button('Play', 17301540 , callback, action='Play')
 ```python
 nBuilder.build()
 ```
-    
-    
+
+#### Remove notification with
+```python
+nBuilder.remove_notification()
+```
+
+#### Access [android notification builder](https://developer.android.com/reference/android/app/Notification.Builder.html) directly with
+```python
+nBuilder.javaBuilder
+### For example, nBuilder.javaBuilder.setOngoing(True) will make notification ongoing
+### Remember that javaBuilder is reset when nBuilder.build is called
+```
 
 #### Remove buttons with
 ```python
 nBuilder.remove_buttons()
 ```
 
+#### Get BroadcastReceiver instance list with
+```python
+nBuilder.get_receivers()
+```
+
 #### Start/Stop BroadcastReceivers with
 ```python
 nBuilder.start()
 nBuilder.stop()
+```
+
+#### Make unremovable with
+```python
+nBuilder.set_ongoing(True)
+```
+
+#### Remove on touch with
+```python
+nBuilder.set_autocancel(True)
 ```

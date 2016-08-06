@@ -33,16 +33,28 @@ class Receiver:
 
 class Notification_Builder:
     def __init__(self, num=0):
+        self.AndroidNotification, self.javaBuilder = self.get_builder()
         self.buttons = []
         self.receivers = []
         self.kwargs = {
             'title': 'Title',
             'message': 'Message',
             'ticker': 'Ticker',
+            'subtext': None,
             'buttons': self.buttons,
             'intentName': 'com.example.app.ACTION_',
+            'ongoing': False,
+            'autocancel': False,
             'num': num
             }
+
+    def get_builder(self):
+        android_noti = notification_modified.AndroidNotification()
+        android_noti_builder = android_noti.noti
+        return android_noti, android_noti_builder
+
+    def get_receivers(self):
+        return self.receivers
 
     def set_title(self,string):
         self.kwargs['title'] = string
@@ -53,8 +65,17 @@ class Notification_Builder:
     def set_ticker(self,string):
         self.kwargs['ticker'] = string
 
+    def set_subtext(self,string):
+        self.kwargs['subtext'] = string
+
     def set_intent(self,string):
         self.kwargs['intentName'] = string
+
+    def set_ongoing(self,boolean):
+        self.kwargs['ongoing'] = boolean
+
+    def set_autocancel(self,boolean):
+        self.kwargs['autocancel'] = boolean
 
     def add_button(self,name,icon,callback,action=None):
         self.add_button_func(name,icon,callback,action)
@@ -89,7 +110,7 @@ class Notification_Builder:
 
     def remove_buttons(self):
         self.buttons = []
-        self.stop
+        self.stop()
         self.receivers = []
 
     def stop(self):
@@ -100,14 +121,19 @@ class Notification_Builder:
         for x in self.receivers:
             x.start()
 
+    def remove_notification(self,num=0):
+        ee = notification_modified.AndroidNotification()
+        ee.remove(num)
+
     def build(self):
         if PY2:
             self.kwargs['title'] = self.kwargs['title'].decode('utf8')
             self.kwargs['message'] = self.kwargs['message'].decode('utf8')
             self.kwargs['ticker'] = self.kwargs['ticker'].decode('utf8')
+            self.kwargs['ticker'] = self.kwargs['ticker'].decode('utf8')
 
-        ee = notification_modified.AndroidNotification()
-        ee.notify(**self.kwargs)
+        self.AndroidNotification.notify(**self.kwargs)
+        self.AndroidNotification, self.javaBuilder = self.get_builder()
 
         if self.buttons != [] and self.buttonChange:
             for action,name,icon,callback in self.buttons:
