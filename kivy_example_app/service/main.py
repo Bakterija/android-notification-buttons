@@ -90,7 +90,7 @@ class Service:
                 if self.queue != '':
                     self.mplayer.osc_callback(['','',self.queue])
                     self.queue = ''
-                    sleep(.3)
+                sleep(.3)
         except Exception as e:
             osc.sendMsg('/some_api', ['Service crash '+str(e)], port=3002)
 
