@@ -1,4 +1,5 @@
 # Android Notification Builder for Python
+#### Requires [Kivy](https://kivy.org) and [Plyer](https://github.com/kivy/plyer), use [Buildozer](https://github.com/kivy/buildozer) to build android apks
 
 Provides a simple way of building
 [Android notifications](https://developer.android.com/guide/topics/ui/notifiers/notifications.html) 
@@ -46,40 +47,61 @@ nBuilder.add_button('Play', 17301540 , callback, action='Play')
 nBuilder.build()
 ```
 
-#### Remove notification with
+### More functions, use before .build()
+
+#### Add vibration (seconds)
+```python
+nBuilder.set_vibrate(float)
+```
+
+#### Add sound (path)
+```python
+nBuilder.set_sound(str)
+```
+
+#### Change intent name
+```python
+### Default is "org.renpy.android.ACTION_"
+### Buttons broadcast "intent name"+"button action",
+### for example, Play button broadcasts "org.renpy.android.ACTION_Play"
+nBuilder.set_intentName(str)
+```
+
+#### Remove notification
 ```python
 nBuilder.remove_notification()
 ```
 
-#### Access [android notification builder](https://developer.android.com/reference/android/app/Notification.Builder.html) directly with
+#### Access [android notification builder](https://developer.android.com/reference/android/app/Notification.Builder.html) directly
 ```python
 nBuilder.javaBuilder
 ### For example, nBuilder.javaBuilder.setOngoing(True) will make notification ongoing
 ### Remember that javaBuilder is reset when nBuilder.build is called
 ```
 
-#### Remove buttons with
+#### Remove buttons
 ```python
 nBuilder.remove_buttons()
 ```
 
-#### Get BroadcastReceiver instance list with
-```python
-nBuilder.get_receivers()
-```
-
-#### Start/Stop BroadcastReceivers with
-```python
-nBuilder.start()
-nBuilder.stop()
-```
-
-#### Make unremovable with
+#### Make unremovable
 ```python
 nBuilder.set_ongoing(True)
 ```
 
-#### Remove on touch with
+#### Remove on touch
 ```python
 nBuilder.set_autocancel(True)
+```
+
+### BroadcastReceivers
+nBuilder creates BroadcastReceivers when buttons are added to listen for touches,     
+Start/stop and get object list with
+```python
+nBuilder.start()
+nBuilder.stop()
+
+nBuilder.get_receivers()
+### BroadcastReceivers have start/stop methods,
+### control them directly by getting the list and running BroadcastReceiver methods
 ```

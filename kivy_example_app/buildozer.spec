@@ -13,7 +13,7 @@ package.domain = org.test
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,m4a,ico,png,ogg
+source.include_exts = py,png,jpg,kv,atlas,m4a,ico,png,ogg,wav
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -52,7 +52,7 @@ fullscreen = 0
 #
 
 # (list) Permissions
-android.permissions = INTERNET
+android.permissions = INTERNET, VIBRATE
 
 # (int) Android API to use
 #android.api = 14

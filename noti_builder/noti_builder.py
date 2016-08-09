@@ -2,9 +2,9 @@ import notification_modified
 from android.broadcast import BroadcastReceiver
 from plyer.utils import platform
 from plyer.compat import PY2
-from jnius import autoclass
 
-class Receiver:
+
+class Receiver(object):
     def __init__(self):
         self.registered = False
         self.intentName = ''
@@ -31,7 +31,8 @@ class Receiver:
         if self.intentName + actionName == action:
             self.callback(actionName)
 
-class Notification_Builder:
+
+class Notification_Builder(object):
     def __init__(self, num=0):
         self.AndroidNotification, self.javaBuilder = self.get_builder()
         self.buttons = []
@@ -42,9 +43,11 @@ class Notification_Builder:
             'ticker': 'Ticker',
             'subtext': None,
             'buttons': self.buttons,
-            'intentName': 'com.example.app.ACTION_',
+            'intentName': 'org.renpy.android.ACTION_',
             'ongoing': False,
             'autocancel': False,
+            'vibrate': None,
+            'sound': '',
             'num': num
             }
 
@@ -76,6 +79,15 @@ class Notification_Builder:
 
     def set_autocancel(self,boolean):
         self.kwargs['autocancel'] = boolean
+
+    def set_vibrate(self,floater):
+        self.kwargs['vibrate'] = floater
+
+    def set_sound(self,string):
+        self.kwargs['sound'] = string
+
+    def set_intentName(self,string):
+        self.kwargs['intentName'] = string
 
     def add_button(self,name,icon,callback,action=None):
         self.add_button_func(name,icon,callback,action)

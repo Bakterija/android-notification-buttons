@@ -1,9 +1,7 @@
-from jnius import autoclass
+from jnius import autoclass, detach
 from plyer.platforms.android import activity, SDK_INT
-
-def return_intent(intentName):
-    intent = Intent(intentName)
-    return intent
+from threading import Thread
+from time import sleep
 
 PythonActivity = autoclass('org.renpy.android.PythonActivity')
 Intent = autoclass('android.content.Intent')
@@ -15,9 +13,17 @@ Drawable = autoclass("{}.R$drawable".format(activity.getPackageName()))
 PythonService = autoclass('org.renpy.android.PythonService')
 Pend = autoclass('android.app.PendingIntent')
 NotificationManager = autoclass('android.app.NotificationManager')
+Vibrator = activity.getSystemService(Context.VIBRATOR_SERVICE)
+MediaPlayer = autoclass('android.media.MediaPlayer')
+AudioManager = autoclass('android.media.AudioManager')
 this = PythonService.mService
 if SDK_INT > 22:
     Action_Builder = autoclass('android.app.Notification$Action$Builder')
+
+def return_intent(intentName):
+    intent = Intent(intentName)
+    return intent
+
 
 class AndroidNotification:
     def __init__(self):
@@ -54,6 +60,15 @@ class AndroidNotification:
             noti.setOngoing(True)
         if kwargs['autocancel']:
             noti.setAutoCancel(True)
+        if kwargs['sound']:
+            self.play_media(kwargs['sound'])
+        if kwargs['vibrate']:
+            if type(kwargs['vibrate']) in (int,float):
+                Vibrator.vibrate(int(1000 * kwargs['vibrate']))
+            else:
+                for i,x in enumerate(kwargs['vibrate']):
+                    kwargs['vibrate'][i] = x*1000
+                Vibrator.vibrate(kwargs['vibrate'][i], -1)
 
         noti.setSmallIcon(icon)
 
@@ -67,6 +82,18 @@ class AndroidNotification:
     def remove(self, num):
         self._get_notification_service().cancel(num)
 
+    def play_media(self,source):
+        def releaser_thread(player,duration):
+            sleep(duration)
+            mPlayer.release()
+            detach()
+        mPlayer = MediaPlayer()
+        mPlayer.setDataSource(source)
+        mPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION)
+        mPlayer.prepare()
+        duration = mPlayer.getDuration()/1000+1
+        mPlayer.start()
+        Thread(target=releaser_thread,args=(mPlayer,duration)).start()
 
 def instance():
     return AndroidNotification()

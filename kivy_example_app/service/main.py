@@ -3,9 +3,6 @@ from kivy.utils import platform
 from kivy.core.audio import SoundLoader
 from kivy.lib import osc
 from noti_builder.noti_builder import Notification_Builder
-try:
-    from jnius import autoclass
-except: pass
 
 class M_Player:
     def intent_callback(self,intent,*arg):
@@ -15,6 +12,7 @@ class M_Player:
 
     def __init__(self,parent):
         try:
+            self.path2 = '/data/data/org.test.npexample/files/beep1.wav'
             self.nBuilder = Notification_Builder()
             self.nBuilder.set_title('Stop')
             self.nBuilder.set_message('msg')
@@ -25,6 +23,8 @@ class M_Player:
             ## action= android PendingIntent action, button name will be used if not provided
             self.nBuilder.Button('Play', 17301540 , self.intent_callback, action='Play')
             self.nBuilder.Button('Pause', 17301539 , self.intent_callback, action='Pause')
+            # self.nBuilder.set_sound(self.path2)
+            self.nBuilder.set_vibrate(1)
             self.nBuilder.build()
 
             self.parent = parent
