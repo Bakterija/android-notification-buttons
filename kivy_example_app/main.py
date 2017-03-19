@@ -1,112 +1,175 @@
-import kivy
-from kivy.lib import osc
+from kivy.properties import BooleanProperty, ListProperty, DictProperty
+from app_modules.simple_tcp.client import SimpleClient
+from app_modules.noti_builder import NotificationBuilder
+from kivy.uix.floatlayout import FloatLayout
 from kivy.clock import Clock, mainthread
-from kivy.app import App
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.stacklayout import StackLayout
-from kivy.uix.label import Label
+from kivy.core.window import Window
+from kivy.metrics import cm, dp
 from kivy.utils import platform
-kivy.require('1.8.0')
+from kivy.logger import Logger
+from kivy.app import App
+from time import sleep
+from sys import path
+import json
+if platform == 'android':
+    from android import AndroidService, activity
+    import android
+    acty = activity._activity
+else:
+    acty = 'n/a'
 
-class MultiLineLabel(Label):
-    def __init__(self, **kwargs):
-        super(MultiLineLabel, self).__init__( **kwargs)
-        self.markup = True
-        self.text_size = self.size
-        self.bind(size= self.on_size)
-        self.bind(text= self.on_text_changed)
-        self.size_hint_y = None # Not needed here
 
-    def on_size(self, widget, size):
-        self.text_size = size[0], None
-        self.texture_update()
-        if self.size_hint_y == None and self.size_hint_x != None:
-            self.height = max(self.texture_size[1], self.line_height)
-        elif self.size_hint_x == None and self.size_hint_y != None:
-            self.width  = self.texture_size[0]
+class NotificationDemo(FloatLayout):
+    noti_ongoing = BooleanProperty()
+    noti_autocancel = BooleanProperty()
+    noti_subtext = BooleanProperty()
 
-    def on_text_changed(self, widget, text):
-        self.on_size(self, self.size)
+    def __init__(self, app, **kwargs):
+        super(NotificationDemo, self).__init__( **kwargs)
+        self.app = app
 
-class NotificationDemo(StackLayout):
+    def go_back(self):
+        self.hide_back_btn()
+        self.ids.sm.current = 'main'
 
-    def __init__(self, **kwargs):
-        super(StackLayout, self).__init__( **kwargs)
-        self.scroller = self.children[-1]
+    def show_back_btn(self):
+        self.ids.back_btn.size = self.ids.tbar.height, self.ids.tbar.height
+        self.ids.back_btn.opacity = 1.0
+        self.ids.back_btn.disabled = False
 
-        self.grid = GridLayout(cols=1, spacing=1, size_hint_y=None)
-        self.scroller.add_widget(self.grid)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
-
-        osc.init()
-        oscid = osc.listen(ipAddr='127.0.0.1', port=3002)
-        osc.bind(oscid, self.osc_callback, '/some_api')
-        Clock.schedule_interval(lambda *x: osc.readQueue(oscid), 0.3)
-
-    def osc_callback(self,message,*args):
-        msg = message[2]
-        Label = MultiLineLabel(text=message[2])
-        self.grid.add_widget(Label)
-
-        ongoingbtn = self.children[-3]
-        autocancelbtn = self.children[-4]
-        subtextbtn = self.children[-5]
-        oncolor = (0.4,0.5,0.75,1)
-        off_color = (0.5,0.5,0.5,1)
-        if msg == 'ongoing1':
-            ongoingbtn.background_color = oncolor
-        elif msg == 'ongoing0':
-            ongoingbtn.background_color = off_color
-
-        elif msg == 'autocancel1':
-            autocancelbtn.background_color = oncolor
-        elif msg == 'autocancel0':
-            autocancelbtn.background_color = off_color
-
-        elif msg == 'subtext1':
-            subtextbtn.background_color = oncolor
-        elif msg == 'subtext0':
-            subtextbtn.background_color = off_color
-
-    def play(self):
-        osc.sendMsg('/some_api', ['Play'], port=3001)
-
-    def pause(self):
-        osc.sendMsg('/some_api', ['Pause'], port=3001)
-
-    def remove_notification(self):
-        osc.sendMsg('/some_api', ['Remove_noti'], port=3001)
-
-    def toggle_ongoing(self):
-        osc.sendMsg('/some_api', ['Toggle_ongoing'], port=3001)
-
-    def toggle_autocancel(self):
-        osc.sendMsg('/some_api', ['Toggle_autocancel'], port=3001)
-
-    def toggle_subtext(self):
-        osc.sendMsg('/some_api', ['Toggle_subtext'], port=3001)
-
-    def quit(self):
-        global service
-        service.stop()
+    def hide_back_btn(self):
+        self.ids.back_btn.size = 1, 1
+        self.ids.back_btn.opacity = 0.0
+        self.ids.back_btn.disabled = True
 
 
 class NotificationDemoApp(App):
-    def build(self):
-        global service
-        if platform == 'android':
-            from android import AndroidService
-            service = AndroidService('my service', 'running')
-            service.start('service started')
+    connected = BooleanProperty(False)
+    activity_dict = DictProperty()
+    client = SimpleClient()
+    nbuilder = NotificationBuilder()
+    service = None
 
-        return NotificationDemo()
+    def build(self):
+        global acty
+        self.root = NotificationDemo(self)
+        if platform == 'android':
+            from jnius import autoclass
+            try:
+                self.service = autoclass(
+                    'org.test.npexample.ServiceMyservice')
+                mActivity = autoclass(
+                    'org.kivy.android.PythonActivity').mActivity
+                argument = ''
+                self.service.start(mActivity, argument)
+            except:
+                self.service = AndroidService(
+                    'Sevice example', 'service is running')
+                self.service.start('Hello From Service')
+        else:
+            Window.system_size = cm(7), cm(12)
+
+        self.client.on_connect = self.on_connect
+        self.client.on_disconnect = self.on_disconnect
+        Clock.schedule_once(self.try_connecting, 0)
+        Clock.schedule_interval(self.handle_msg, 0.1)
+        def skipp(*a):
+            self.root.ids.sm.current = 'main'
+        Clock.schedule_once(skipp, 0.5)
+        self.activity_dict.update({'app': acty})
+        return self.root
+
+    def try_connecting(self, *args):
+        try:
+            if not self.connected:
+                self.client.connect()
+        except Exception as e:
+            Logger.info(
+                'Connection to service failed with error: "{}", '
+                'reconnecting'.format(e))
+            Clock.schedule_once(self.try_connecting, 2)
+
+    def on_connected(self, _, value):
+        if not value:
+            Logger.info('NotificationDemoApp: reconnecting')
+            Clock.schedule_once(self.try_connecting, 0)
+
+    def on_connect(self, *args):
+        self.connected = True
+        Logger.info('NotificationDemoApp: on_connect()')
+        self.root.ids.sm.current = 'main'
+
+    def on_disconnect(self, *args):
+        self.connected = False
+        Logger.info('NotificationDemoApp: on_disconnect()')
+
+    def send_json(self, msg):
+        self.send_msg(json.dumps(msg))
+
+    def send_msg(self, msg):
+        if self.connected:
+            try:
+                self.client.send(msg)
+            except Exception as e:
+                Logger.error('NotificationDemoApp: send_mesg: {}'.format(e))
+                self.on_disconnect()
+
+    def handle_msg(self, *args):
+        if self.client:
+            msg = self.client.read_queue()
+            if msg:
+                Logger.info('App: msg={}'.format(msg))
+                msg = msg.split("::")
+                if msg[0] == 'SET':
+                    if msg[1] == 'SERVICE_ACTIVITY':
+                        self.activity_dict.update({'service': msg[2]})
+
+    def build_notification(self, **kwargs):
+        if kwargs['activity'] == 'App':
+            for k in (
+                'id', 'ticker', 'subtext', 'message', 'ongoing', 'autocancel',
+                'title'):
+                self.nbuilder.kwargs[k] = kwargs[k]
+            if kwargs['vibrate']:
+                self.nbuilder.kwargs['vibrate'] = 1.0
+            else:
+                self.nbuilder.kwargs['vibrate'] = 0.0
+            if kwargs['sound']:
+                self.nbuilder.kwargs['sound'] = path[4] + '/audio/beep1.wav'
+            else:
+                self.nbuilder.kwargs['sound'] = ''
+            self.nbuilder.build()
+
+        else:
+            msg = json.dumps(
+                {'method': 'build_notification', 'kwargs': kwargs})
+            Logger.info('build_notification: %s' % (msg))
+            self.send_msg(msg)
+
+    def remove_notification(self, **kwargs):
+        if kwargs['activity'] == 'App':
+            self.nbuilder.remove_notification(id=kwargs['id'])
+
+        else:
+            msg = json.dumps(
+                {'method': 'remove_notification', 'kwargs': kwargs})
+            self.send_msg(msg)
 
     def on_pause(self):
-        osc.sendMsg('/some_api', ['Ping'], port=3001)
         return True
 
     def on_resume(self):
         pass
 
+    def stop_service(self):
+        if platform == 'android':
+            android.stop_service()
+
+    def on_stop(self):
+        if self.service:
+            self.stop_service()
+
+
 if __name__ == '__main__':
-    NotificationDemoApp().run()
+    app = NotificationDemoApp()
+    app.run()

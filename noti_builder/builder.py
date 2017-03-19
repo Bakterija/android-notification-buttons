@@ -1,7 +1,14 @@
-import notification_modified
-from android.broadcast import BroadcastReceiver
 from plyer.utils import platform
 from plyer.compat import PY2
+from kivy.logger import Logger
+if platform == 'android':
+    from android.broadcast import BroadcastReceiver
+    from . import notification
+else:
+    notification = None
+    Logger.warning(
+        'Platform is not android, ignoring AndroidNotification and '
+        'BroadcastReceiver imports')
 
 
 class Receiver(object):
@@ -11,7 +18,8 @@ class Receiver(object):
         self.actionName = ''
 
     def register(self, intentName, actionName, callback):
-        self.br = BroadcastReceiver(self.on_broadcast, actions=[intentName+actionName])
+        self.br = BroadcastReceiver(
+            self.on_broadcast, actions=[intentName+actionName])
         self.intentName = intentName
         self.actionName = actionName
         self.callback = callback
@@ -32,9 +40,11 @@ class Receiver(object):
             self.callback(actionName)
 
 
-class Notification_Builder(object):
-    def __init__(self, num=0):
-        self.AndroidNotification, self.javaBuilder = self.get_builder()
+class NotificationBuilder(object):
+    def __init__(self, id=1):
+        if notification:
+            with tcatch():
+                self.AndroidNotification, self.javaBuilder = self.get_builder()
         self.buttons = []
         self.receivers = []
         self.kwargs = {
@@ -48,54 +58,54 @@ class Notification_Builder(object):
             'autocancel': False,
             'vibrate': None,
             'sound': '',
-            'num': num
+            'id': id
             }
 
     def get_builder(self):
-        android_noti = notification_modified.AndroidNotification()
+        android_noti = notification.AndroidNotification()
         android_noti_builder = android_noti.noti
         return android_noti, android_noti_builder
 
     def get_receivers(self):
         return self.receivers
 
-    def set_title(self,string):
+    def set_title(self, string):
         self.kwargs['title'] = string
 
-    def set_message(self,string):
+    def set_message(self, string):
         self.kwargs['message'] = string
 
-    def set_ticker(self,string):
+    def set_ticker(self, string):
         self.kwargs['ticker'] = string
 
-    def set_subtext(self,string):
+    def set_subtext(self, string):
         self.kwargs['subtext'] = string
 
-    def set_intent(self,string):
+    def set_intent(self, string):
         self.kwargs['intentName'] = string
 
-    def set_ongoing(self,boolean):
+    def set_ongoing(self, boolean):
         self.kwargs['ongoing'] = boolean
 
-    def set_autocancel(self,boolean):
+    def set_autocancel(self, boolean):
         self.kwargs['autocancel'] = boolean
 
-    def set_vibrate(self,floater):
-        self.kwargs['vibrate'] = floater
+    def set_vibrate(self, flt):
+        self.kwargs['vibrate'] = flt
 
-    def set_sound(self,string):
+    def set_sound(self, string):
         self.kwargs['sound'] = string
 
-    def set_intentName(self,string):
+    def set_intentName(self, string):
         self.kwargs['intentName'] = string
 
-    def add_button(self,name,icon,callback,action=None):
-        self.add_button_func(name,icon,callback,action)
+    def add_button(self, name, icon, callback, action=None):
+        self.add_button_func(name, icon, callback, action)
 
-    def Button(self,name,icon,callback, action=None):
-        self.add_button_func(name,icon,callback,action)
+    def Button(self, name, icon, callback, action=None):
+        self.add_button_func(name, icon, callback, action)
 
-    def add_button_func(self,name,icon,callback, action):
+    def add_button_func(self, name, icon, callback, action):
         ## 0. Displayed button name
         ## 1. icon integer available at https://developer.android.com/reference/android/R.drawable.html
         ## 2. callback
@@ -133,9 +143,9 @@ class Notification_Builder(object):
         for x in self.receivers:
             x.start()
 
-    def remove_notification(self,num=0):
-        ee = notification_modified.AndroidNotification()
-        ee.remove(num)
+    def remove_notification(self, id=0):
+        ee = notification.AndroidNotification()
+        ee.remove(id)
 
     def build(self):
         if PY2:

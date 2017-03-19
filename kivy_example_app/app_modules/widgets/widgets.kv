@@ -1,0 +1,42 @@
+<AppScreen@Screen>:
+    canvas:
+        Color:
+            rgba: col_white
+        Rectangle:
+            size: self.size
+            pos: 0, 0
+
+
+<AppLabel@Label>:
+    size_hint_y: 0.1
+    color: col_white
+    font_size: self.height * 0.5
+    text_size: self.width, None
+    halign: 'left'
+
+
+<Section@Label>:
+    size_hint_y: 0.05
+    color: col_blue
+    font_size: self.height * 0.5
+    text_size: self.width, None
+    halign: 'left'
+    canvas.before:
+        Color:
+            rgba: col_bblue
+        Line:
+            points: self.x, self.y, self.right, self.y
+
+
+<BlueButton>:
+    size_hint_y: 0.1
+    font_size: self.height * 0.5
+    background_normal: 'images/blue_dark.png'
+    background_down: 'images/blue_bright.png'
+
+
+<GreyButton>:
+    size_hint_y: 0.1
+    font_size: self.height * 0.5
+    background_normal: 'images/blue_greyer.png'
+    background_down: 'images/blue_bright.png'

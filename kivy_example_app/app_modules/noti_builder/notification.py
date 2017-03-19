@@ -3,20 +3,25 @@ from plyer.platforms.android import activity, SDK_INT
 from threading import Thread
 from time import sleep
 
-PythonActivity = autoclass('org.renpy.android.PythonActivity')
+# try:
+#     PythonActivity = autoclass('org.renpy.android.PythonActivity')
+#     PythonService = autoclass('org.renpy.android.PythonService')
+# print('DDDDDD, activity', PythonActivity)
 Intent = autoclass('android.content.Intent')
 aString = autoclass('java.lang.String')
 aInt = autoclass('java.lang.Integer')
 Context = autoclass('android.content.Context')
 NotificationBuilder = autoclass('android.app.Notification$Builder')
 Drawable = autoclass("{}.R$drawable".format(activity.getPackageName()))
-PythonService = autoclass('org.renpy.android.PythonService')
 Pend = autoclass('android.app.PendingIntent')
 NotificationManager = autoclass('android.app.NotificationManager')
 Vibrator = activity.getSystemService(Context.VIBRATOR_SERVICE)
 MediaPlayer = autoclass('android.media.MediaPlayer')
 AudioManager = autoclass('android.media.AudioManager')
-this = PythonService.mService
+
+# this = PythonService.mService
+this = activity
+print('DDDDDD, activity', this)
 if SDK_INT > 22:
     Action_Builder = autoclass('android.app.Notification$Action$Builder')
 
@@ -40,7 +45,7 @@ class AndroidNotification:
 
         ## Icon integers are available at https://developer.android.com/reference/android/R.drawable.html
         if SDK_INT >= 16:
-            for bAction,bName,bIcon,bCallback in kwargs['buttons']:
+            for bAction, bName, bIcon, bCallback in kwargs['buttons']:
                 intent = return_intent(kwargs['intentName']+bAction)
                 pend = Pend.getBroadcast( this, 100, intent, 0)
                 if SDK_INT < 23:
@@ -63,7 +68,7 @@ class AndroidNotification:
         if kwargs['sound']:
             self.play_media(kwargs['sound'])
         if kwargs['vibrate']:
-            if type(kwargs['vibrate']) in (int,float):
+            if type(kwargs['vibrate']) in (int, float):
                 Vibrator.vibrate(int(1000 * kwargs['vibrate']))
             else:
                 for i,x in enumerate(kwargs['vibrate']):
@@ -77,10 +82,10 @@ class AndroidNotification:
         else:
             noti = noti.getNotification()
 
-        self._get_notification_service().notify(kwargs['num'], noti)
+        self._get_notification_service().notify(kwargs['id'], noti)
 
-    def remove(self, num):
-        self._get_notification_service().cancel(num)
+    def remove(self, id):
+        self._get_notification_service().cancel(id)
 
     def play_media(self,source):
         def releaser_thread(player,duration):

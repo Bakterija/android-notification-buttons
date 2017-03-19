@@ -29,10 +29,10 @@ source.include_exts = py,png,jpg,kv,atlas,m4a,ico,png,ogg,wav
 # version.filename = %(source.dir)s/main.py
 
 # (str) Application versioning (method 2)
-version = 1.1
+version = 2.0
 
 # (list) Application requirements
-requirements = plyer,kivy,android
+requirements = hostpython2,plyer,kivy==master,android
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
@@ -41,7 +41,7 @@ requirements = plyer,kivy,android
 #icon.filename = %(source.dir)s/data/icon.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
-orientation = all
+orientation = portrait
 
 # (bool) Indicate if the application should be fullscreen or not
 fullscreen = 0
@@ -55,13 +55,13 @@ fullscreen = 0
 android.permissions = INTERNET, VIBRATE
 
 # (int) Android API to use
-#android.api = 14
+#android.api = 19
 
 # (int) Minimum API required (8 = Android 2.2 devices)
 android.minapi = 13
 
 # (int) Android SDK version to use
-#android.sdk = 21
+#android.sdk = 19
 
 # (str) Android NDK version to use
 #android.ndk = 9
