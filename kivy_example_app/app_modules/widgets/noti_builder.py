@@ -19,7 +19,7 @@ Builder.load_string('''
         background_normal: root.btn_img
         background_down: root.btn_img
         text_size: self.width, None
-        padding: dp(4), 0
+        padding: cm(0.2), 0
         text: 'Toggle %s' % (root.name)
         on_release: root.on_release()
     Button:
@@ -39,7 +39,7 @@ Builder.load_string('''
         background_normal: root.btn_img
         background_down: root.btn_img
         text_size: self.width, None
-        padding: dp(4), 0
+        padding: cm(0.2), 0
         text: 'Set %s' % (root.name)
         on_release: root.on_release()
     Button:
@@ -59,7 +59,7 @@ Builder.load_string('''
         background_normal: root.btn_img
         background_down: root.btn_img
         text_size: self.width, None
-        padding: dp(4), 0
+        padding: cm(0.2), 0
         text: 'Set %s' % (root.name)
         on_release: root.on_release()
     Button:

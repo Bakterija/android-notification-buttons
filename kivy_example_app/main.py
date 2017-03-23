@@ -12,11 +12,9 @@ from time import sleep
 from sys import path
 import json
 if platform == 'android':
-    from android import AndroidService, activity
+    from android import AndroidService
+    from jnius import autoclass
     import android
-    acty = activity._activity
-else:
-    acty = 'n/a'
 
 
 class NotificationDemo(FloatLayout):
@@ -45,16 +43,13 @@ class NotificationDemo(FloatLayout):
 
 class NotificationDemoApp(App):
     connected = BooleanProperty(False)
-    activity_dict = DictProperty()
     client = SimpleClient()
     nbuilder = NotificationBuilder()
     service = None
 
     def build(self):
-        global acty
         self.root = NotificationDemo(self)
         if platform == 'android':
-            from jnius import autoclass
             try:
                 self.service = autoclass(
                     'org.test.npexample.ServiceMyservice')
@@ -73,10 +68,9 @@ class NotificationDemoApp(App):
         self.client.on_disconnect = self.on_disconnect
         Clock.schedule_once(self.try_connecting, 0)
         Clock.schedule_interval(self.handle_msg, 0.1)
-        def skipp(*a):
-            self.root.ids.sm.current = 'main'
-        Clock.schedule_once(skipp, 0.5)
-        self.activity_dict.update({'app': acty})
+        # def skipp(*a):
+        #     self.root.ids.sm.current = 'main'
+        # Clock.schedule_once(skipp, 0.5)
         return self.root
 
     def try_connecting(self, *args):
@@ -119,10 +113,6 @@ class NotificationDemoApp(App):
             msg = self.client.read_queue()
             if msg:
                 Logger.info('App: msg={}'.format(msg))
-                msg = msg.split("::")
-                if msg[0] == 'SET':
-                    if msg[1] == 'SERVICE_ACTIVITY':
-                        self.activity_dict.update({'service': msg[2]})
 
     def build_notification(self, **kwargs):
         if kwargs['activity'] == 'App':

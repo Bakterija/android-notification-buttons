@@ -1,5 +1,5 @@
-import main as service_main
+from service.appservice import AppService
 
 
 if __name__ == '__main__':
-    service_main.main_loop(new_toolchain=True)
+    service = AppService(new_toolchain=True)
