@@ -43,8 +43,7 @@ class Receiver(object):
 class NotificationBuilder(object):
     def __init__(self, id=1):
         if notification:
-            with tcatch():
-                self.AndroidNotification, self.javaBuilder = self.get_builder()
+            self.AndroidNotification, self.javaBuilder = self.get_builder()
         self.buttons = []
         self.receivers = []
         self.kwargs = {
