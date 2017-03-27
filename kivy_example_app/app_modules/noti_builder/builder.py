@@ -68,6 +68,9 @@ class NotificationBuilder(object):
     def get_receivers(self):
         return self.receivers
 
+    def set_id(self, number):
+        self.kwargs['id'] = number
+
     def set_title(self, string):
         self.kwargs['title'] = string
 

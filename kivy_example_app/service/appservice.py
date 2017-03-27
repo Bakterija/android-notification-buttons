@@ -54,12 +54,36 @@ class AppService(object):
             'mplayer_play': self.mplayer.play,
             'mplayer_pause': self.mplayer.pause,
         }
+        self.make_media_notification(False)
         self.service_loop()
+
+    def make_media_notification(self, is_playing):
+        if platform == 'android':
+            b2 = NotificationBuilder()
+            if self.new_toolchain:
+                b2.set_id(0)
+            else:
+                b2.set_id(1)
+            b2.set_title('Media Service')
+            b2.set_ticker('Starting media service')
+            if is_playing:
+                b2.set_message('Playing')
+            else:
+                b2.set_message('Paused')
+            if not b2.buttons:
+                b2.add_button(
+                    'Play', 17301540, self.intent_callback, action='Play')
+                b2.add_button(
+                    'Pause', 17301539, self.intent_callback, action='Pause')
+            b2.set_ongoing(True)
+            b2.set_autocancel(False)
+            b2.build()
 
     def intent_callback(self, intent, *arg):
         # BroadcastReceiver callbacks are done on a different thread
         # and can crash the service on unsafe tasks, puting in queue is safe
-        self.intent_queue.put(intent)
+        # self.intent_queue.put(intent)
+        print('EEE', 'intent_callback', intent)
 
     def on_connect(self, client):
         Logger.info('AppService: client connected')
@@ -90,11 +114,13 @@ class AppService(object):
     def on_mplayer_play(self):
         Logger.info('AppService: on_mplayer_play()')
         self.send_msg('MediaPlayer: play()')
+        self.make_media_notification(True)
 
     def on_mplayer_pause(self):
         Logger.info('AppService: on_mplayer_pause()')
         self.send_msg('MediaPlayer: pause at {}'.format(
             self.mplayer.pause_time))
+        self.make_media_notification(False)
 
     def handle_msg(self, client, msg):
         mdict = json.loads(str(msg))

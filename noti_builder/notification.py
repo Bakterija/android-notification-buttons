@@ -6,7 +6,6 @@ from time import sleep
 # try:
 #     PythonActivity = autoclass('org.renpy.android.PythonActivity')
 #     PythonService = autoclass('org.renpy.android.PythonService')
-# print('DDDDDD, activity', PythonActivity)
 Intent = autoclass('android.content.Intent')
 aString = autoclass('java.lang.String')
 aInt = autoclass('java.lang.Integer')
@@ -21,7 +20,6 @@ AudioManager = autoclass('android.media.AudioManager')
 
 # this = PythonService.mService
 this = activity
-print('DDDDDD, activity', this)
 if SDK_INT > 22:
     Action_Builder = autoclass('android.app.Notification$Action$Builder')
 
