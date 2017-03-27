@@ -2,14 +2,19 @@ import sys
 sys.path.append('../')
 from app_modules.noti_builder import NotificationBuilder
 from app_modules.simple_tcp.server import SimpleServer
-from app_modules.media_player import MediaPlayer
-from kivy.core.audio import SoundLoader
 from kivy.utils import platform
 from kivy.logger import Logger
 from plyer.compat import PY2
 from time import sleep
+from sys import path
 import traceback
 import json
+if platform == 'android':
+    '''SDL2 service activity audio is currently bugged, we use native android
+    player instead'''
+    from app_modules.android_media_player import MediaPlayer
+else:
+    from app_modules.media_player import MediaPlayer
 
 if PY2:
     from Queue import Queue
@@ -30,8 +35,8 @@ class AppService(object):
     def __init__(self, new_toolchain=False):
         self.new_toolchain = new_toolchain
         if new_toolchain:
-            self.beep_path = 'audio/beep1.wav'
-            self.rain_path = 'audio/rain.ogg'
+            self.beep_path = '%s/audio/beep1.wav' % (path[4])
+            self.rain_path = '%s/audio/rain.ogg' % (path[4])
         self.server.on_connect = self.on_connect
         self.server.on_disconnect = self.on_disconnect
         self.mplayer = MediaPlayer(

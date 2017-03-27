@@ -156,7 +156,7 @@ class NotificationDemoApp(App):
             android.stop_service()
 
     def on_stop(self):
-        self.nbuilder.remove_notification(id=11)
+        self.nbuilder.remove_notification(id=0)
         if self.service:
             self.stop_service()
 

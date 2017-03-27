@@ -27,9 +27,9 @@ class MediaPlayer(object):
     def pause(self):
         if not self.sound:
             return
-        else:
-            self.pause_time = self.sound.get_pos()
-            self.sound.stop()
+
+        self.pause_time = self.sound.get_pos()
+        self.sound.stop()
         self.state = 'pause'
         self.on_pause()
 

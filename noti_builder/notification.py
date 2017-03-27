@@ -85,8 +85,8 @@ class AndroidNotification:
     def remove(self, id):
         self._get_notification_service().cancel(id)
 
-    def play_media(self,source):
-        def releaser_thread(player,duration):
+    def play_media(self, source):
+        def releaser_thread(player, duration):
             sleep(duration)
             mPlayer.release()
             detach()
